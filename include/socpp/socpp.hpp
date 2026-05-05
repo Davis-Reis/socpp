@@ -12,7 +12,7 @@ public:
     Socket(const Socket&) = delete;
     Socket& operator=(const Socket&) = delete;
 
-    // Move constructor
+    // Move operations
     Socket(Socket&& other) noexcept;
     Socket& operator=(Socket&& other) noexcept;
 
@@ -25,7 +25,7 @@ public:
     
 
 private:
-    int fd_ = -1
-}
+    int fd_ = -1;
+};
 
 } // namespace socpp
