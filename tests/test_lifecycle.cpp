@@ -38,5 +38,28 @@ int main() {
         ::close(write_end);
     }
 
+    {
+        socpp::Socket s;
+        assert(!s.valid());
+        assert(s.fd() == -1);
+    }
+
+    ::pipe(pipefd);
+    {
+        socpp::Socket a(pipefd[0]);
+        socpp::Socket b(std::move(a));
+
+        assert(!a.valid());
+        assert(b.valid());
+        assert(b.fd() == pipefd[0]);
+        assert(a.fd() == -1);
+        assert(fd_is_open(pipefd[0]));
+    }   // Rune destructor
+    
+    assert(!fd_is_open(pipefd[0]));
+
+    ::close(pipefd[1]);
+
+
     return 0;
 }
