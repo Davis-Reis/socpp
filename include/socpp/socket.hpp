@@ -22,6 +22,9 @@ public:
 
     void close() noexcept;
 
+    void read_exact(void* buf, std::size_t size);
+
+    void write_all(const void* buf, std::size_t size);
     
 
 private:
