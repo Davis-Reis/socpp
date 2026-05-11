@@ -63,8 +63,26 @@ int main() {
         ::close(pipefd[1]);
     }
     
+    {
+        int p1[2], p2[2];
+        ::pipe(p1);
+        ::pipe(p2);
+        {
+            socpp::Socket a(p1[0]);
+            socpp::Socket b(p2[0]);
 
+            b = std::move(a);
 
+            assert(!a.valid());
+            assert(b.valid());
+            assert(b.fd() == p1[0]);
+            assert(fd_is_open(p1[0]));
+            assert(!fd_is_open(p2[0]));
+        }
+        assert(!fd_is_open(p1[0]));
 
+        ::close(p1[1]);
+        ::close(p2[1]);
+    }
     return 0;
 }

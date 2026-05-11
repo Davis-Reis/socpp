@@ -40,4 +40,8 @@ void Socket::close() noexcept {
     }
 }
 
+void read_exact(void* buf, std::size_t size) {
+    
+}
+
 } // namespace socpp
