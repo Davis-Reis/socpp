@@ -40,8 +40,32 @@ void Socket::close() noexcept {
     }
 }
 
-void read_exact(void* buf, std::size_t size) {
-    
+void Socket::read_exact(void* buf, std::size_t size) {
+    // void* arithmetic causes a compile error so cast to uint_8
+    auto* p = static_cast<std::uint8_t>(buf);
+    std::size_t bytes_read = 0;
+    while(bytes_read < size) {
+        // pointer arithmetic here is used to append message onto the end of the buffer.
+        //         (fd ,   memory addr   , remaining length )
+        n = ::recv(fd_, buf + bytes_read, bytes_read - size);
+        
+        // Success
+        if(n > 0) {
+            bytes_read += n;
+        }
+
+        // Closed connection
+        else if(n == 0) {
+            throw ConnectionError("Connection closed by peer");
+        }
+
+        // Error
+        else {
+            // Error from systemcallinterupt
+            if (errno == EINTR) continue;
+            throw SocketError("recv failed: errno = " + std::string(std::errno(errno)));
+        }
+
 }
 
 } // namespace socpp
