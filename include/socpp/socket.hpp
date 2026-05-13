@@ -28,7 +28,6 @@ public:
     void close() noexcept;
 
     // Reads size amount of bytes and stores them in buf
-    // Some magic needs to happen here to trim off the TCP header.
     void read_exact(void* buf, std::size_t size);
 
     // Writes bytes from buf to socket datastream
