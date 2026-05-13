@@ -1,6 +1,18 @@
 #pragma once
 
+#include <stdexcept>
+
 namespace socpp {
+
+class SocketError : public std::runtime_error {
+public:
+    explicit SocketError(const std::string& msg) : std::runtime_error(msg) {}
+};
+
+class ConnectionError : public std::runtime_error {
+public:
+    explicit ConnectionError(const std::string& msg) : std::runtime_error(msg) {}
+};
 
 class Socket {
 public:
