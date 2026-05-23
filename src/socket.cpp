@@ -68,4 +68,22 @@ void Socket::read_exact(void* buf, std::size_t size) {
 
 }
 
+void write_all(const void* buf, std::size_t size) {
+    auto* p = static_cast<std::uint8_t>(buf);
+    std::size_t bytes_sent = 0;
+    while(bytes_sent < size) {
+        // pointer arithmaetic is same as read_exact
+        n = ::send(fd_, buf + bytes_sent, size - bytes_sent);
+
+        // Success
+        if (n >= 0) {
+            bytes_sent += n;
+        }
+        // Error
+        else {
+            if (errno == EINTR) continue;
+            throw SocketError("send failed: errno = " + std:string(std::errno(errno)));
+        }
+    }
+
 } // namespace socpp
