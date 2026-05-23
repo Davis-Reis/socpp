@@ -50,7 +50,7 @@ void Socket::read_exact(void* buf, std::size_t size) {
     while(bytes_read < size) {
         // pointer arithmetic here is used to append message onto the end of the buffer.
         //         (fd ,   memory addr   , remaining length )
-        n = ::recv(fd_, buf + bytes_read, bytes_read - size);
+        n = ::recv(fd_, p + bytes_read, bytes_read - size);
         
         // Success
         if(n > 0) {
@@ -80,7 +80,7 @@ void write_all(const void* buf, std::size_t size) {
     bytes_sent = 0;
     while(bytes_sent < size) {
         // pointer arithmaetic is same as read_exact
-        n = ::send(fd_, buf + bytes_sent, size - bytes_sent);
+        n = ::send(fd_, p + bytes_sent, size - bytes_sent);
 
         // Success
         if (n >= 0) {
