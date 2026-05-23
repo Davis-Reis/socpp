@@ -44,6 +44,20 @@ public:
 
     // Writes bytes from buf to socket datastream
     void write_all(const void* buf, std::size_t size);
+
+    // Factories
+    // Connect socket
+    // Encasupates everything to do with connecting a socket
+    // addrinfo hints, res
+    // getaddrinfo("www.example.com", "3490", &hints, &res)
+    // ::connect(fd, res->ai_family, res->ai_addrlen)
+    static Socket connect(const string& ip, std::uint16_t port);
+
+    // Listen
+    static Socket listen(std::uint16_t port);
+    
+    // Accept
+    Socket accept();
     
 
 private:
