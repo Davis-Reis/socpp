@@ -42,8 +42,11 @@ void Socket::close() noexcept {
 
 void Socket::read_exact(void* buf, std::size_t size) {
     // void* arithmetic causes a compile error so cast to uint_8
-    auto* p = static_cast<std::uint8_t>(buf);
-    std::size_t bytes_read = 0;
+    auto* p;
+    std::size_t bytes_read;
+    std::ssize_t n;
+    p = static_cast<std::uint8_t>(buf);
+    bytes_read = 0;
     while(bytes_read < size) {
         // pointer arithmetic here is used to append message onto the end of the buffer.
         //         (fd ,   memory addr   , remaining length )
@@ -69,8 +72,12 @@ void Socket::read_exact(void* buf, std::size_t size) {
 }
 
 void write_all(const void* buf, std::size_t size) {
-    auto* p = static_cast<std::uint8_t>(buf);
-    std::size_t bytes_sent = 0;
+    auto* p;
+    std::size_t bytes_sent;
+    std::ssize_t n;
+    
+    p = static_cast<std::uint8_t>(buf);
+    bytes_sent = 0;
     while(bytes_sent < size) {
         // pointer arithmaetic is same as read_exact
         n = ::send(fd_, buf + bytes_sent, size - bytes_sent);
