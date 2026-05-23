@@ -89,8 +89,36 @@ void write_all(const void* buf, std::size_t size) {
         // Error
         else {
             if (errno == EINTR) continue;
-            throw SocketError("send failed: errno = " + std:string(std::errno(errno)));
+            throw SocketError("send failed: errno = " + std::string(std::errno(errno)));
         }
     }
+}
+
+Socket connect(const string& ip, std::uint16_t port) {
+    int s, con;
+    Socket socket;
+    struct sockaddr_in addr;
+
+
+    s = ::socket(AF_INET, SOCK_STREAM, 0);
+    socket = Socket::Socket(s);
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_port = port;
+    
+    // TODO: I think string usage here might be broken
+    inet_pton(AF_INET, ip, &(addr.sin_addr));
+
+    con = ::connect(fd_, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
+
+    if (con != 0) {
+        throw ConnectionError("connection failed: erno = " + std::string(std::erno(errno)));
+    }
+    else {
+        return socket;
+    }
+}
+
+
 
 } // namespace socpp
