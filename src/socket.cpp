@@ -1,6 +1,9 @@
 #include "socpp/socket.hpp"
 
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 namespace socpp {
 
@@ -42,15 +45,12 @@ void Socket::close() noexcept {
 
 void Socket::read_exact(void* buf, std::size_t size) {
     // void* arithmetic causes a compile error so cast to uint_8
-    auto* p;
-    std::size_t bytes_read;
-    std::ssize_t n;
-    p = static_cast<std::uint8_t>(buf);
-    bytes_read = 0;
+    auto* p = static_cast<std::uint8_t*>(buf);
+    std::size_t bytes_read = 0;
     while(bytes_read < size) {
         // pointer arithmetic here is used to append message onto the end of the buffer.
         //         (fd ,   memory addr   , remaining length )
-        n = ::recv(fd_, p + bytes_read, bytes_read - size);
+        ssize_t n = ::recv(fd_, p + bytes_read, bytes_read - size, 0);
         
         // Success
         if(n > 0) {
@@ -66,21 +66,18 @@ void Socket::read_exact(void* buf, std::size_t size) {
         else {
             // Error from systemcallinterupt
             if (errno == EINTR) continue;
-            throw SocketError("recv failed: errno = " + std::string(std::errno(errno)));
+            throw SocketError("recv failed: errno = " + std::string(std::strerror(errno)));
         }
-
+    }
 }
 
-void write_all(const void* buf, std::size_t size) {
-    auto* p;
-    std::size_t bytes_sent;
-    std::ssize_t n;
-    
-    p = static_cast<std::uint8_t>(buf);
-    bytes_sent = 0;
+void Socket::write_all(const void* buf, std::size_t size) {
+    auto* p = static_cast<const std::uint8_t*>(buf);
+    std::size_t bytes_sent = 0;
+
     while(bytes_sent < size) {
         // pointer arithmaetic is same as read_exact
-        n = ::send(fd_, p + bytes_sent, size - bytes_sent);
+        ssize_t n = ::send(fd_, p + bytes_sent, size - bytes_sent, 0);
 
         // Success
         if (n >= 0) {
@@ -89,36 +86,35 @@ void write_all(const void* buf, std::size_t size) {
         // Error
         else {
             if (errno == EINTR) continue;
-            throw SocketError("send failed: errno = " + std::string(std::errno(errno)));
+            throw SocketError("send failed: errno = " + std::string(std::strerror(errno)));
         }
     }
 }
 
-Socket connect(const string& ip, std::uint16_t port) {
+Socket Socket::connect(const std::string& ip, std::uint16_t port) {
     int s, con;
     Socket socket;
     struct sockaddr_in addr;
 
 
     s = ::socket(AF_INET, SOCK_STREAM, 0);
-    socket = Socket::Socket(s);
+    socket = Socket(s);
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = port;
     
     // TODO: I think string usage here might be broken
-    inet_pton(AF_INET, ip, &(addr.sin_addr));
+    ::inet_pton(AF_INET, ip.c_str(), &(addr.sin_addr));
 
-    con = ::connect(fd_, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
+    int fd = socket.fd();
+    con = ::connect(fd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
 
     if (con != 0) {
-        throw ConnectionError("connection failed: erno = " + std::string(std::erno(errno)));
+        throw ConnectionError("connection failed: erno = " + std::string(std::strerror(errno)));
     }
     else {
         return socket;
     }
 }
-
-
 
 } // namespace socpp

@@ -1,6 +1,10 @@
 #pragma once
 
 #include <stdexcept>
+#include <cstdint>
+#include <cstring>
+#include <cerrno>
+#include <system_error>
 
 namespace socpp {
 
@@ -51,7 +55,7 @@ public:
     // addrinfo hints, res
     // getaddrinfo("www.example.com", "3490", &hints, &res)
     // ::connect(fd, res->ai_family, res->ai_addrlen)
-    static Socket connect(const string& ip, std::uint16_t port);
+    static Socket connect(const std::string& ip, std::uint16_t port);
 
     // Listen
     static Socket listen(std::uint16_t port);
