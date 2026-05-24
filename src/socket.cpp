@@ -138,7 +138,7 @@ Socket Socket::listen(std::uint16_t port) {
 }
 
 Socket Socket::accept() {
-    int client_fd = ::accept(, nullptr, nullptr);
+    int client_fd = ::accept(fd_ , nullptr, nullptr);
 
     if (client_fd != 0) {
         throw ConnectionError("accept failed: errno = " + std::string(std::strerror(errno)));
