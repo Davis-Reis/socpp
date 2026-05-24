@@ -103,7 +103,6 @@ Socket Socket::connect(const std::string& ip, std::uint16_t port) {
     addr.sin_family = AF_INET;
     addr.sin_port = port;
     
-    // TODO: I think string usage here might be broken
     ::inet_pton(AF_INET, ip.c_str(), &(addr.sin_addr));
 
     int fd = socket.fd();
@@ -111,6 +110,28 @@ Socket Socket::connect(const std::string& ip, std::uint16_t port) {
 
     if (con != 0) {
         throw ConnectionError("connection failed: erno = " + std::string(std::strerror(errno)));
+    }
+    else {
+        return socket;
+    }
+}
+
+Socket Socket::listen(std::uint16_t port) {
+    int s, bind;
+    Socket socket;
+    struct sockaddr_in addr;
+
+    s = ::socket(AF_INET, SOCK_STREAM, 0);
+    socket = Socket(s);
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_port = port;
+    addr.sin_addr.s_addr = INADDR_ANY;
+
+    bind = ::bind(fd_, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
+
+    if (bind != 0) {
+        throw ConnectionError("bind failed: errno = " + std::string(std::strerror(errno)));
     }
     else {
         return socket;
