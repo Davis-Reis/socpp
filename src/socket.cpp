@@ -134,7 +134,12 @@ Socket Socket::listen(std::uint16_t port) {
         throw ConnectionError("bind failed: errno = " + std::string(std::strerror(errno)));
     }
     else {
-        return socket;
+        int listen = ::listen(fd_, SOMAXCONN);
+        if (listen != 0) {
+            throw ConnectionError("listen failed: errno = " + std::string(std::strerror(errno)));
+        }
+        else {
+            return socket;
     }
 }
 
