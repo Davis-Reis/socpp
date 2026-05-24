@@ -50,7 +50,7 @@ void Socket::read_exact(void* buf, std::size_t size) {
     while(bytes_read < size) {
         // pointer arithmetic here is used to append message onto the end of the buffer.
         //         (fd ,   memory addr   , remaining length )
-        ssize_t n = ::recv(fd_, p + bytes_read, bytes_read - size, 0);
+        ssize_t n = ::recv(fd_, p + bytes_read, size - bytes_read, 0);
         
         // Success
         if(n > 0) {
@@ -101,7 +101,7 @@ Socket Socket::connect(const std::string& ip, std::uint16_t port) {
     socket = Socket(s);
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
-    addr.sin_port = port;
+    addr.sin_port = htons(port);
     
     ::inet_pton(AF_INET, ip.c_str(), &(addr.sin_addr));
 
@@ -109,7 +109,7 @@ Socket Socket::connect(const std::string& ip, std::uint16_t port) {
     con = ::connect(fd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
 
     if (con != 0) {
-        throw ConnectionError("connection failed: erno = " + std::string(std::strerror(errno)));
+        throw ConnectionError("connection failed: errno = " + std::string(std::strerror(errno)));
     }
     else {
         return socket;
@@ -140,7 +140,7 @@ Socket Socket::listen(std::uint16_t port) {
 Socket Socket::accept() {
     int client_fd = ::accept(fd_ , nullptr, nullptr);
 
-    if (client_fd != 0) {
+    if (client_fd == -1) {
         throw ConnectionError("accept failed: errno = " + std::string(std::strerror(errno)));
     }
     else {
