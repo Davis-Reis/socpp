@@ -58,9 +58,18 @@ public:
     static Socket connect(const std::string& ip, std::uint16_t port);
 
     // Listen
+    // Call ::socket(AF_INET, SOCK_STREAM, 0).
+    // Wrap it in a Socket.
+    // Build a sockaddr_in with INADDR_ANY and the port.
+    // Call ::bind(fd, ...). Throw on failure.
+    // Call ::listen(fd, backlog). Throw on failure.
+    // Return the Socket.
     static Socket listen(std::uint16_t port);
     
     // Accept
+    // Call ::accept(fd_, ...) on the listening socket.
+    // Throw on failure.
+    // Return a new Socket wrapping the returned fd.
     Socket accept();
     
 

@@ -117,34 +117,28 @@ Socket Socket::connect(const std::string& ip, std::uint16_t port) {
 }
 
 Socket Socket::listen(std::uint16_t port) {
-    int s, bind;
-    Socket socket;
-    struct sockaddr_in addr;
+    int fd = ::socket(AF_INET, SOCK_STREAM, 0);
+    if (fd == -1) {
+        throw SocketError("socket failed: " + std::string(std::strerror(errno)));
+    }
+    Socket sock(fd);
 
-    s = ::socket(AF_INET, SOCK_STREAM, 0);
-    socket = Socket(s);
-    memset(&addr, 0, sizeof(addr));
+    sockaddr_in addr{};
     addr.sin_family = AF_INET;
-    addr.sin_port = port;
-    addr.sin_addr.s_addr = INADDR_ANY;
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.sin_port = htons(port);
 
-    bind = ::bind(fd_, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
+    if (::bind(sock.fd(), reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) == -1) {
+        throw SocketError("bind() failed: " + std::string(std::strerror(errno)));
+    }
 
-    if (bind != 0) {
-        throw ConnectionError("bind failed: errno = " + std::string(std::strerror(errno)));
-    }
-    else {
-        int listen = ::listen(fd_, SOMAXCONN);
-        if (listen != 0) {
-            throw ConnectionError("listen failed: errno = " + std::string(std::strerror(errno)));
-        }
-        else {
-            return socket;
-    }
+    if (::listen(sock.fd(), SOMAXCONN) == -1) {
+        throw SocketError("listen() failed: " + std::string(std::strerror(errno))); }
+    return sock;
 }
 
 Socket Socket::accept() {
-    int client_fd = ::accept(fd_, nullptr, nullptr);
+    int client_fd = ::accept(, nullptr, nullptr);
 
     if (client_fd != 0) {
         throw ConnectionError("accept failed: errno = " + std::string(std::strerror(errno)));
