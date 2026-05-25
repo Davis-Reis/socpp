@@ -49,15 +49,18 @@ public:
     // Writes bytes from buf to socket datastream
     void write_all(const void* buf, std::size_t size);
 
-    // Factories
-    // Connect socket
-    // Encasupates everything to do with connecting a socket
-    // addrinfo hints, res
-    // getaddrinfo("www.example.com", "3490", &hints, &res)
-    // ::connect(fd, res->ai_family, res->ai_addrlen)
+    // !!! Factories !!!
+    // Creates a socket for a specific purpose
+
+    // Connect socket 
+    // Call ::socket(AF_INET, SOCK_STREAM, ...)
+    // Wrap it in a Socket
+    // Build a sockaddr_in with IP and port (inet_pton(AF_INET, "127.0.0.1", &(sockaddr_in)))
+    // Call ::connect(sock.fd(), ...) Throw error on fail
+    // Return socket
     static Socket connect(const std::string& ip, std::uint16_t port);
 
-    // Listen
+    // Listen socket
     // Call ::socket(AF_INET, SOCK_STREAM, 0).
     // Wrap it in a Socket.
     // Build a sockaddr_in with INADDR_ANY and the port.
@@ -66,7 +69,7 @@ public:
     // Return the Socket.
     static Socket listen(std::uint16_t port);
     
-    // Accept
+    // Accept socket
     // Call ::accept(fd_, ...) on the listening socket.
     // Throw on failure.
     // Return a new Socket wrapping the returned fd.
