@@ -49,7 +49,7 @@ void Socket::read_exact(void* buf, std::size_t size) {
     std::size_t bytes_read = 0;
     while(bytes_read < size) {
         // pointer arithmetic here is used to append message onto the end of the buffer.
-        //         (fd ,   memory addr   , remaining length )
+        //                (fd ,   memory addr ,  remaining length   )
         ssize_t n = ::recv(fd_, p + bytes_read, size - bytes_read, 0);
         
         // Success
@@ -109,7 +109,7 @@ Socket Socket::connect(const std::string& ip, std::uint16_t port) {
     con = ::connect(fd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
 
     if (con != 0) {
-        throw ConnectionError("connection failed: errno = " + std::string(std::strerror(errno)));
+        throw SocketError("connection failed: errno = " + std::string(std::strerror(errno)));
     }
     else {
         return socket;
@@ -141,7 +141,7 @@ Socket Socket::accept() {
     int client_fd = ::accept(fd_ , nullptr, nullptr);
 
     if (client_fd == -1) {
-        throw ConnectionError("accept failed: errno = " + std::string(std::strerror(errno)));
+        throw SocketError("accept failed: errno = " + std::string(std::strerror(errno)));
     }
     else {
         return Socket(client_fd);
