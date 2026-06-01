@@ -122,6 +122,11 @@ Socket Socket::listen(std::uint16_t port) {
         throw SocketError("socket failed: " + std::string(std::strerror(errno)));
     }
     Socket sock(fd);
+    int opt = 1;
+
+    if(setsockopt(sock.fd(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
+        throw  SocketError("socket failed to set reuseaddr: " + std::string(std::strerror(errno)));
+    }
 
     sockaddr_in addr{};
     addr.sin_family = AF_INET;
