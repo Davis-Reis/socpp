@@ -74,10 +74,13 @@ void Socket::read_exact(void* buf, std::size_t size) {
 void Socket::write_all(const void* buf, std::size_t size) {
     auto* p = static_cast<const std::uint8_t*>(buf);
     std::size_t bytes_sent = 0;
+    int flags = 0;
+
+    flags = flags || MSG_NOSIGNAL;
 
     while(bytes_sent < size) {
         // pointer arithmaetic is same as read_exact
-        ssize_t n = ::send(fd_, p + bytes_sent, size - bytes_sent, 0);
+        ssize_t n = ::send(fd_, p + bytes_sent, size - bytes_sent, flags);
 
         // Success
         if (n >= 0) {
